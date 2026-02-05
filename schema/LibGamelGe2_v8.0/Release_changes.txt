@@ -1,0 +1,14 @@
+Release V8.0
+FP - 27th August 2024
+
+- Add IRLZ24 FET
+- Swap pins of Omnimate 2 pts connector to match polarity of PIC18F board
+- Increased 1/4W resistor pads size from 1.6mm to 2mm
+- Add ESP32 module
+- Add MCP3202 DIP ADC
+- Add MCP3204 DIP ADC
+- Add MCP3208 DIP ADC
+- Add I2C Grove 16x2 LCD
+- Add 4 pts vertical JST Grove connector
+- Add 4 pts horizontal JST Grove connector
+- Add LD1117V33 3.3V linear regulator

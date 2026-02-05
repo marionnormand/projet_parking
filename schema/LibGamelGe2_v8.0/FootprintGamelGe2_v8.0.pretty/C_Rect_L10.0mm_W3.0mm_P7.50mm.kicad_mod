@@ -1,0 +1,225 @@
+(footprint "C_Rect_L10.0mm_W3.0mm_P7.50mm"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "C, Rect series, Radial, pin pitch=7.50mm, , length*width=10*3.0mm^2, Capacitor, http://www.wima.com/EN/WIMA_MKS_4.pdf")
+	(tags "C Rect series Radial pin pitch 7.50mm  length 10mm width 3.0mm Capacitor")
+	(property "Reference" "REF**"
+		(at 3.75 -2.75 0)
+		(layer "F.SilkS")
+		(uuid "7c9c17f7-2c1d-4e33-a4f0-562d9266a71f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "C_Rect_L10.0mm_W3.0mm_P7.50mm"
+		(at 3.75 2.75 0)
+		(layer "F.Fab")
+		(uuid "625ca00e-8399-4f90-be2b-f7b2e8a07a9f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a04a8e64-1dd4-4f83-8790-29489c0594b1")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "58926dab-2c6d-4823-a985-01fac4a1209c")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "5ebc610f-6be0-447a-a782-4e48cba10252")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_line
+		(start -1.37 -1.62)
+		(end -1.37 1.62)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "73f76336-470d-415b-b278-085dc09d9d5a")
+	)
+	(fp_line
+		(start -1.37 -1.62)
+		(end 8.87 -1.62)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4c8c89f9-3c0d-404e-95f9-cdd2a6374af3")
+	)
+	(fp_line
+		(start -1.37 1.62)
+		(end 8.87 1.62)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5dc139cf-0dab-4548-b293-89093d22db7d")
+	)
+	(fp_line
+		(start 8.87 -1.62)
+		(end 8.87 1.62)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5dffe156-2637-4111-9293-5095b6e9841a")
+	)
+	(fp_line
+		(start -1.5 -1.75)
+		(end -1.5 1.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "2c9ca980-eddd-4e10-a951-462274689dbf")
+	)
+	(fp_line
+		(start -1.5 1.75)
+		(end 9 1.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "8169e9ee-4337-4233-b6ef-942fdaddf015")
+	)
+	(fp_line
+		(start 9 -1.75)
+		(end -1.5 -1.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "bcd1d003-705a-4a74-aa1b-8b1527ce112a")
+	)
+	(fp_line
+		(start 9 1.75)
+		(end 9 -1.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "83df5a62-9d97-423f-af39-8de2b6145fd1")
+	)
+	(fp_line
+		(start -1.25 -1.5)
+		(end -1.25 1.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "be8d685c-e85c-4988-9cbb-4db55fb14d87")
+	)
+	(fp_line
+		(start -1.25 1.5)
+		(end 8.75 1.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d7739700-9a75-4b42-8a24-2253e14bc712")
+	)
+	(fp_line
+		(start 8.75 -1.5)
+		(end -1.25 -1.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d7172e4d-8e1d-4c85-bcff-439381cf3a90")
+	)
+	(fp_line
+		(start 8.75 1.5)
+		(end 8.75 -1.5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "70e6a77d-6c2b-4658-84ae-2167ecb08732")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 3.75 0 0)
+		(layer "F.Fab")
+		(uuid "83fe581d-119f-43ee-962c-ad43ffda1673")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole circle
+		(at 0 0)
+		(size 2.4 2.4)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "39393095-4d3d-4d1a-8bf1-08c3c5fdca36")
+	)
+	(pad "2" thru_hole circle
+		(at 7.5 0)
+		(size 2.4 2.4)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "038004f1-5056-4022-a917-f93f674e9cae")
+	)
+	(model "${KIPRJMOD}/LibGamelGe2_v8.0/3D/C_Rect_L10.0mm_W3.0mm_P7.50mm.STEP"
+		(offset
+			(xyz 3.75 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
