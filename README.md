@@ -22,7 +22,7 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 
 \## Objectifs du projet
 
-\- Concevoir une carte électronique (PCB) compatible Arduino
+\- Concevoir une carte électronique (PCB) compatible Arduino Uno R3
 
 \- Intégrer des capteurs infrarouges de détection
 
@@ -58,6 +58,10 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 
 3\. Sécurité : la barrière ne se ferme pas si un véhicule est encore présent
 
+4\. S'il n'y a plus de détection au niveau des capteurs, la barrière se ferme au bout de 1 minute 
+
+5\. L'ouverture et la fermeture de la barrière peuvent être controlés avec l'interface 
+
 
 
 ---
@@ -68,11 +72,11 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 
 \- Arduino Uno R3
 
-\- Carte électronique personnalisée (PCB)
+\- Carte électronique personnalisée (PCB) avec régulateur LM7805 et connecteurs 
 
-\- 2 capteurs infrarouges
+\- 2 capteurs infrarouges 50NK 
 
-\- Barrière motorisée ou servomoteur
+\- Barrière motorisée HS-322HD 
 
 \- Alimentation externe
 
