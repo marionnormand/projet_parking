@@ -38,13 +38,13 @@
 		(allow_soldermask_bridges_in_footprints no)
 		(tenting front back)
 		(pcbplotparams
-			(layerselection 0x00000000_00000000_55555555_5755f5ff)
+			(layerselection 0x00000000_00000000_55555555_57555551)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
 			(disableapertmacros no)
 			(usegerberextensions no)
-			(usegerberattributes yes)
-			(usegerberadvancedattributes yes)
-			(creategerberjobfile yes)
+			(usegerberattributes no)
+			(usegerberadvancedattributes no)
+			(creategerberjobfile no)
 			(dashed_line_dash_ratio 12.000000)
 			(dashed_line_gap_ratio 3.000000)
 			(svgprecision 4)
@@ -72,9 +72,9 @@
 			(subtractmaskfromsilk no)
 			(outputformat 1)
 			(mirror no)
-			(drillshape 1)
+			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "output")
 		)
 	)
 	(net 0 "")
@@ -731,7 +731,7 @@
 				)
 			)
 		)
-		(property "Value" "C"
+		(property "Value" "330n"
 			(at 2.5 2.5 0)
 			(layer "F.Fab")
 			(uuid "4df3f245-e755-4ace-a8a9-0156a48e1724")
@@ -2899,7 +2899,7 @@
 				)
 			)
 		)
-		(property "Value" "C"
+		(property "Value" "100n"
 			(at 2.5 2.5 90)
 			(layer "F.Fab")
 			(uuid "30460578-4442-4826-a773-0d70fa32665a")
