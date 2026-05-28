@@ -1,76 +1,112 @@
+extern "C" {
 #include "../lib/lvgl/lvgl.h"
+}
+
+
+#ifdef ARDUINO
+
+#include "lvglDrivers.h"
+#include <Servo.h>
+
+
+Servo barriere;
+
+const int PIN_IRE = PA0;       // Broche analogique entree du capteur IR
+const int PIN_IRS = PB9;       // Broche analogique sortie du capteur IR
+//const int SEUIL  = 1000;      // 0–1023 
+
+// à décommenter pour tester la démo
+// #include "demos/lv_demos.h"
+// #include <demos/widgets/lv_demo_widgets.h>
+
+
+// Labels persistants utilisés par le système Arduino
+static lv_obj_t * label_parking = NULL;
+static lv_obj_t * label_status = NULL;
+static lv_obj_t * btn_ouvrir = NULL;
+static lv_obj_t * btn_fermer = NULL;
 
 
 static void event_handler(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * target = (lv_obj_t *) lv_event_get_target(e);
 
     if(code == LV_EVENT_CLICKED) {
-        LV_LOG_USER("Clicked");
+      if (target == btn_ouvrir) {
+        barriere.write(60); // Ouvrir la barrière
+        Serial.println("btn_ouvrir");
+      }
+
+      else if (target == btn_fermer) {
+        barriere.write(140); // Fermer la barrière
+        Serial.println("btn_fermer");
+      }
+
     }
     else if(code == LV_EVENT_VALUE_CHANGED) {
         LV_LOG_USER("Toggled");
     }
 }
 
-void testLvgl()
-{
-  // Initialisations générales
-  lv_obj_t * label;
 
-  lv_obj_t * btn1 = lv_button_create(lv_screen_active());
-  lv_obj_add_event_cb(btn1, event_handler, LV_EVENT_ALL, NULL);
-  lv_obj_align(btn1, LV_ALIGN_CENTER, 0, -40);
-  lv_obj_remove_flag(btn1, LV_OBJ_FLAG_PRESS_LOCK);
-
-  label = lv_label_create(btn1);
-  lv_label_set_text(label, "Button");
-  lv_obj_center(label);
-
-  lv_obj_t * btn2 = lv_button_create(lv_screen_active());
-  lv_obj_add_event_cb(btn2, event_handler, LV_EVENT_ALL, NULL);
-  lv_obj_align(btn2, LV_ALIGN_CENTER, 0, 40);
-  lv_obj_add_flag(btn2, LV_OBJ_FLAG_CHECKABLE);
-  lv_obj_set_height(btn2, LV_SIZE_CONTENT);
-
-  label = lv_label_create(btn2);
-  lv_label_set_text(label, "Toggle");
-  lv_obj_center(label);
+void init_system() {
+  Serial.begin(115200);
+  pinMode(PIN_IRE, INPUT);
+  pinMode(PIN_IRS, INPUT);
+  barriere.attach(PIN_A5);
 }
 
-#ifdef ARDUINO
 
-#include "lvglDrivers.h"
+void testLvgl()
+{
+  barriere.write(140);
+
+  btn_ouvrir = lv_button_create(lv_screen_active());
+  lv_obj_add_event_cb(btn_ouvrir, event_handler, LV_EVENT_ALL, NULL);
+  lv_obj_align(btn_ouvrir, LV_ALIGN_CENTER, -100, 70);
+  lv_obj_remove_flag(btn_ouvrir, LV_OBJ_FLAG_PRESS_LOCK);
+
+  lv_obj_t * labelbutton1 = lv_label_create(btn_ouvrir);
+  lv_label_set_text(labelbutton1, "Ouvrir la barriere");
+  lv_obj_center(labelbutton1);
+
+  
+  btn_fermer = lv_button_create(lv_screen_active());
+  lv_obj_add_event_cb(btn_fermer, event_handler, LV_EVENT_ALL, NULL);
+  lv_obj_align(btn_fermer, LV_ALIGN_CENTER, 100, 70);
+  lv_obj_remove_flag(btn_fermer, LV_OBJ_FLAG_PRESS_LOCK);
+
+  lv_obj_t * labelbutton2 = lv_label_create(btn_fermer);
+  lv_label_set_text(labelbutton2, "Fermer la barriere");
+  lv_obj_center(labelbutton2);
+}
 
 
-#define PA0 PIN_A0
+int gestion_capteurs() {
+  int valE = digitalRead(PIN_IRE);
+  int valS = digitalRead(PIN_IRS);
 
-const int PIN_IR = PA0;       // Broche analogique
-const int SEUIL  = 500;      // Seuil de détection (0–1023)
+  Serial.printf("Entree: %d, Sortie: %d\n", valE, valS);
 
-// à décommenter pour tester la démo
-#include "demos/lv_demos.h"
-#include "lvgl.h"
-#include <demos/widgets/lv_demo_widgets.h>
-
-
-int recup_infrarouge() {
-  int val = analogRead(PIN_IR);
-  lv_obj_t * label = lv_label_create(lv_scr_act());
-  if (val > SEUIL) {
-    lv_label_set_text(label, "Objet détecté !");
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+  if (valE == LOW && valS == LOW) {
+    lv_label_set_text(label_status, "Objet detecte entree et sortie");
+    return 1;
+  }
+  else if (valE == LOW) {
+    lv_label_set_text(label_status, "Objet detecte sur entree");
+      barriere.write(60); // Ouvrir la barrière
+    return 1;
+  }
+  else if (valS == LOW) {
+    lv_label_set_text(label_status, "Objet detecte sur sortie");
+    barriere.write(140); // Fermer la barrière
     return 1;
   }
   else {
-    lv_label_set_text(label, "Aucun objet détecté");
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_text(label_status, "Aucun objet detecte");
     return 0;
   }
-}
-
-void init_system() {
-  pinMode(PIN_IR, INPUT);
 }
 
 void mySetup()
@@ -80,15 +116,27 @@ void mySetup()
 
   // Initialisations générales
   init_system();
-  // testLvgl();
+  // crée les boutons + UI de base
+  testLvgl();
 
+  // label fixe en haut : nom du parking
+  label_parking = lv_label_create(lv_screen_active());
+  lv_label_set_text(label_parking, "Parking IUT");
+  lv_obj_align(label_parking, LV_ALIGN_TOP_MID, 1, 6);
+
+  // label de statut centré
+  label_status = lv_label_create(lv_screen_active());
+  lv_label_set_text(label_status, "Aucun objet detecte");
+  lv_obj_align(label_status, LV_ALIGN_CENTER, 0, 0);
 }
 
 void loop()
 {
   // Inactif (pour mise en veille du processeur)
-  recup_infrarouge();
+  // recup_infrarouge();
 }
+
+
 
 void myTask(void *pvParameters)
 {
@@ -98,7 +146,7 @@ void myTask(void *pvParameters)
   xLastWakeTime = xTaskGetTickCount();
   while (1)
   {
-    // Loop
+    gestion_capteurs();
 
     // Endort la tâche pendant le temps restant par rapport au réveil,
     // ici 200ms, donc la tâche s'effectue toutes les 200ms
@@ -108,7 +156,9 @@ void myTask(void *pvParameters)
 
 #else
 
+extern "C" {
 #include "lvgl.h"
+}
 #include "app_hal.h"
 #include <cstdio>
 
