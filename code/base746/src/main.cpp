@@ -11,25 +11,32 @@
 
 Servo barriere;
 
-const int PIN_IRE = PA0;       // Broche analogique entree du capteur IR
-const int PIN_IRS = PB9;       // Broche analogique sortie du capteur IR
+const int PIN_IRE = PA0;
+const int PIN_IRS = PB9;
 
-// Labels persistants utilisés par le système Arduino
 static lv_obj_t * label_parking = NULL;
 static lv_obj_t * label_status = NULL;
 static lv_obj_t * btn_ouvrir = NULL;
 static lv_obj_t * btn_fermer = NULL;
 static lv_obj_t * btn_ticket = NULL;
+static lv_obj_t * swt_manuel = NULL;
 static lv_obj_t * img_barriere = NULL;
+static lv_obj_t * label_manuel = NULL;
 
-bool ticket_ok = false; // false = fermée, true = ouverte
+// Plus de lvgl_mutex ici — on utilise lvglLock/lvglUnlock de lvglDrivers
+extern bool lvglLock(TickType_t xBlockTime);
+extern bool lvglUnlock();
 
-// Variables pour le chrono de fermeture automatique
+bool ticket_ok = false;
+bool etat_barriere = false;
+bool voiture = false;
+bool mode_manuel = false; 
+bool est_ouvert = false; 
+
 using Clock = std::chrono::steady_clock;
 static Clock::time_point barriere_open_start;
 static bool barriere_ouverte_flag = false;
 
-// Evenement lors d'appui sur boutons
 static void event_handler(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
@@ -39,37 +46,43 @@ static void event_handler(lv_event_t * e)
       if (target == btn_ouvrir) {
         lv_obj_add_state(btn_ouvrir, LV_STATE_DISABLED);
         lv_obj_clear_state(btn_fermer, LV_STATE_DISABLED);
-        barriere.write(60); // Ouvrir la barrière
-        lv_image_set_src(img_barriere, &barriere_ouverte);  // Afficher image ouverte
-        // Démarrer le chrono de fermeture automatique
+        barriere.write(60);
+        lv_image_set_src(img_barriere, &barriere_ouverte);
+
         barriere_ouverte_flag = true;
         barriere_open_start = Clock::now();
         Serial.println("btn_ouvrir");
       }
-
       else if (target == btn_fermer) {
         lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
         lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
-        barriere.write(140); // Fermer la barrière
-        lv_image_set_src(img_barriere, &barriere_fermee);   // Afficher image fermée
-        // Annuler le chrono si fermeture manuelle
+        barriere.write(140);
+        lv_image_set_src(img_barriere, &barriere_fermee);
         barriere_ouverte_flag = false;
         Serial.println("btn_fermer");
       }
-
       else if (target == btn_ticket) {
         ticket_ok = true;
         lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
         Serial.println("btn_ticket");
       }
-
     }
-    else if(code == LV_EVENT_VALUE_CHANGED) {
-        LV_LOG_USER("Toggled");
+    if (code == LV_EVENT_VALUE_CHANGED && target == swt_manuel) {
+      if (lv_obj_has_state(swt_manuel, LV_STATE_CHECKED)) { 
+          lv_label_set_text(label_manuel, "Mode manuel");
+          mode_manuel = true;
+          lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED); 
+          Serial.println("Mode manuel activé"); // mode manuel
+      } else { // mode automatique
+          mode_manuel = false;
+          lv_label_set_text(label_manuel, "Mode auto");
+          lv_obj_add_state(btn_ouvrir, LV_STATE_DISABLED); 
+          lv_obj_add_state(btn_fermer, LV_STATE_DISABLED); 
+          Serial.println("Mode manuel désactivé");
+      }
     }
 }
 
-// Initialisation des pins et du terminal
 void init_system() {
   Serial.begin(115200);
   pinMode(PIN_IRE, INPUT);
@@ -77,150 +90,180 @@ void init_system() {
   barriere.attach(PIN_A5);
 }
 
-// Initialisation de l'affichage du lvgl
 void init_affichage()
 {
   barriere.write(140);
 
-  // label fixe en haut : nom du parking
+  lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0xFFFFFF), 0);
+  lv_obj_set_style_bg_opa(lv_screen_active(), LV_OPA_COVER, 0);
+
   label_parking = lv_label_create(lv_screen_active());
   lv_label_set_text(label_parking, "Parking de l'IUT");
   lv_obj_align(label_parking, LV_ALIGN_TOP_MID, 1, 6);
   lv_obj_set_style_text_font(label_parking, &lv_font_montserrat_20, 0);
-  lv_obj_set_style_text_color(label_parking, lv_color_hex(0x1A73E8), 0);
+  lv_obj_set_style_text_color(label_parking, lv_color_hex(0x4061E4), 0);
 
-  // Image de la barrière
+  // image barriere fermee sans voiture au demarrage 
   img_barriere = lv_image_create(lv_screen_active());
   lv_image_set_src(img_barriere, &barriere_fermee);
-  lv_obj_align(img_barriere, LV_ALIGN_CENTER, 0, -50);
+  lv_obj_align(img_barriere, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
   lv_obj_set_size(img_barriere, 200, 150);
 
-  // COLONNE GAUCHE : Ouvrir / Fermer la barrière
+  // bouton ouverture barriere 
   btn_ouvrir = lv_button_create(lv_screen_active());
   lv_obj_add_event_cb(btn_ouvrir, event_handler, LV_EVENT_ALL, NULL);
   lv_obj_set_size(btn_ouvrir, 160, 50);
   lv_obj_align(btn_ouvrir, LV_ALIGN_BOTTOM_LEFT, 20, -80);
   lv_obj_remove_flag(btn_ouvrir, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(btn_ouvrir, lv_color_hex(0xB3E137), 0); // vert kaki
-
+  lv_obj_set_style_bg_color(btn_ouvrir, lv_color_hex(0x4E3C62), 0); // violet
   lv_obj_t * labelbutton1 = lv_label_create(btn_ouvrir);
   lv_label_set_text(labelbutton1, "Ouverture barriere");
   lv_obj_center(labelbutton1);
+  lv_obj_add_state(btn_ouvrir, LV_STATE_DISABLED); // desactive au demarrage 
 
+  // bouton fermeture barriere 
   btn_fermer = lv_button_create(lv_screen_active());
   lv_obj_add_event_cb(btn_fermer, event_handler, LV_EVENT_ALL, NULL);
   lv_obj_set_size(btn_fermer, 160, 50);
   lv_obj_align(btn_fermer, LV_ALIGN_BOTTOM_LEFT, 20, -20);
   lv_obj_remove_flag(btn_fermer, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(btn_fermer, lv_color_hex(0xB3E137), 0); // vert kaki
-
+  lv_obj_set_style_bg_color(btn_fermer, lv_color_hex(0x4E3C62), 0); // violet
   lv_obj_t * labelbutton2 = lv_label_create(btn_fermer);
   lv_label_set_text(labelbutton2, "Fermeture barriere");
   lv_obj_center(labelbutton2);
+  lv_obj_add_state(btn_fermer, LV_STATE_DISABLED); // desactive au demarrage 
 
-  lv_obj_add_state(btn_fermer, LV_STATE_DISABLED); // bouton inutilisable au début
-
-  // COLONNE DROITE : Prendre le ticket
+  // bouton du ticket 
   btn_ticket = lv_button_create(lv_screen_active());
   lv_obj_add_event_cb(btn_ticket, event_handler, LV_EVENT_ALL, NULL);
-  lv_obj_set_size(btn_ticket, 160, 110);
-  lv_obj_align(btn_ticket, LV_ALIGN_BOTTOM_RIGHT, -20, -20);
+  lv_obj_set_size(btn_ticket, 160, 70);
+  lv_obj_align(btn_ticket, LV_ALIGN_TOP_RIGHT, -20, 60);
   lv_obj_remove_flag(btn_ticket, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(btn_ticket, lv_color_hex(0xE16A5B), 0); // rose saumon
-
+  lv_obj_set_style_bg_color(btn_ticket, lv_color_hex(0xA64C1F), 0); // orange
   lv_obj_t * labelbutton3 = lv_label_create(btn_ticket);
   lv_label_set_text(labelbutton3, "Prendre\nun ticket");
   lv_obj_set_style_text_align(labelbutton3, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_center(labelbutton3);
-
-  lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+  lv_obj_add_state(btn_ticket, LV_STATE_DISABLED); // desactive au demarrage 
+  
+  // bouton pour le passage au mode manuel 
+  swt_manuel = lv_switch_create(lv_screen_active());
+  lv_obj_add_event_cb(swt_manuel, event_handler, LV_EVENT_ALL, NULL);
+  lv_obj_set_size(swt_manuel, 160, 50);
+  lv_obj_align(swt_manuel, LV_ALIGN_TOP_LEFT, 20, 80);
+  lv_obj_remove_flag(swt_manuel, LV_OBJ_FLAG_PRESS_LOCK);
+  lv_obj_set_style_bg_color(swt_manuel, lv_color_hex(0x937BEF), 0); // orange
+  label_manuel = lv_label_create(lv_screen_active());
+  lv_label_set_text(label_manuel, "Mode auto");
+  lv_obj_align_to(label_manuel, swt_manuel, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
 }
 
-// Fermeture automatique de la barrière après TIMECHRONO ms
 void gestion_chrono() {
+  // Appelée avec mutex déjà pris
   if (barriere_ouverte_flag) {
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
         Clock::now() - barriere_open_start).count();
 
     if (elapsed >= TIMECHRONO) {
-      barriere.write(140); // Fermer la barrière
-      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-      lv_image_set_src(img_barriere, &barriere_fermee);
-      lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
-      lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
-      barriere_ouverte_flag = false;
+      barriere.write(140);
+      if (mode_manuel == false) {
+        ticket_ok = false;
+        lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+        barriere_ouverte_flag = false;
+      } else {
+        lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
+        lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
+        lv_image_set_src(img_barriere, &barriere_fermee);
+      }
+      
+      // lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
+      // lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
       Serial.println("Fermeture automatique apres chrono");
     }
   }
 }
 
-// Lecture des capteurs et gestion du parking (image + barrière)
-// capteurs actifs à 0L
+// affichage de l'image (4 images différentes) 
+void gestion_image() {
+  if (voiture && !mode_manuel) {
+    if(etat_barriere) lv_image_set_src(img_barriere, &barriere_ouverte_voiture);
+    else lv_image_set_src(img_barriere, &barriere_fermee_voiture);
+  }
+  else if (!voiture && !mode_manuel) {
+    if(etat_barriere) lv_image_set_src(img_barriere, &barriere_ouverte);
+    else lv_image_set_src(img_barriere, &barriere_fermee);
+  }
+}
+
+// lecture des capteurs de présence (infrarouges)
 int gestion_capteurs() {
   int valE = digitalRead(PIN_IRE);
   int valS = digitalRead(PIN_IRS);
 
   Serial.printf("Entree: %d, Sortie: %d\n", valE, valS);
-
-  if (valE == LOW && valS == LOW) {
-    // Les deux capteurs détectent en même temps, on ne fait rien
-    return 1;
+  if (!mode_manuel) {
+    if (valE == LOW && valS == LOW) {
+      etat_barriere = true;
+      voiture = true;
+      return 1;
+    }
+    else if (valE == LOW && ticket_ok == false) {
+      etat_barriere = false;
+      voiture = true;
+      lv_obj_clear_state(btn_ticket, LV_STATE_DISABLED);
+      return 1;
+    }
+    else if (valE == LOW && ticket_ok == true) {
+      etat_barriere = true;
+      voiture = true;
+      barriere.write(60);
+      barriere_ouverte_flag = true;
+      barriere_open_start = Clock::now();
+      Serial.println("Barriere ouverte - chrono demarre");
+      return 1;
+    }
+    else if (valS == LOW) {
+      etat_barriere = false;
+      voiture = true;
+      ticket_ok = false;
+      barriere.write(140);
+      barriere_ouverte_flag = false;
+      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+      Serial.println("Sortie detectee - barriere fermee");
+      return 1;
+    }
+    else {
+      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+      etat_barriere = false;
+      voiture = false;
+      return 0;
+    }
   }
-  else if (valE == LOW && ticket_ok == false) {
-    // Véhicule à l'entrée sans ticket : activer le bouton ticket
-    lv_obj_clear_state(btn_ticket, LV_STATE_DISABLED);
-    return 1;
-  }
-  else if (valE == LOW && ticket_ok == true) {
-    // Véhicule à l'entrée avec ticket valide : ouvrir la barrière
-    lv_image_set_src(img_barriere, &barriere_ouverte);
-    ticket_ok = false; // Réinitialiser le ticket
-    barriere.write(60); // Ouvrir la barrière
-    // Démarrer le chrono de fermeture automatique
-    barriere_ouverte_flag = true;
-    barriere_open_start = Clock::now();
-    Serial.println("Barriere ouverte - chrono demarre");
-    return 1;
-  }
-  else if (valS == LOW) {
-    // Véhicule à la sortie : fermer la barrière et annuler le chrono
-    lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-    barriere.write(140); // Fermer la barrière
-    lv_image_set_src(img_barriere, &barriere_fermee);
-    barriere_ouverte_flag = false; // Annuler le chrono
-    Serial.println("Sortie detectee - barriere fermee");
-    return 1;
-  }
-  else {
-    lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-    return 0;
-  }
+  return 0;
 }
 
 void mySetup()
 {
   init_system();
   init_affichage();
-
-  xTaskCreate(myTask, "gestion_capteurs", 1024, NULL, 1, NULL);
 }
 
-void loop()
-{
-  // Inactif (pour mise en veille du processeur)
-}
+void loop() {}
 
 void myTask(void *pvParameters)
 {
-  TickType_t xLastWakeTime;
-  xLastWakeTime = xTaskGetTickCount();
+  TickType_t xLastWakeTime = xTaskGetTickCount();
 
   while (1)
   {
     gestion_capteurs();
-    gestion_chrono(); // Vérifier si la barrière doit se fermer automatiquement
 
-    // Tâche exécutée toutes les 200ms
+    if (lvglLock(pdMS_TO_TICKS(100))) {
+      gestion_image();
+      gestion_chrono();
+      lvglUnlock();
+    }
+
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(200));
   }
 }
@@ -240,9 +283,7 @@ int main(void)
 
   lv_init();
   hal_setup();
-
   testLvgl();
-
   hal_loop();
   return 0;
 }

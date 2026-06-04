@@ -15,6 +15,8 @@
     #include "lvgl/lvgl.h"
 #endif
 
+LV_IMG_DECLARE(barriere_fermee_voiture);
+LV_IMG_DECLARE(barriere_ouverte_voiture);
 LV_IMG_DECLARE(barriere_fermee);
 LV_IMG_DECLARE(barriere_ouverte);
 
