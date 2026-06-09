@@ -43,3 +43,6 @@ Pour contrôler le servomoteur, il s'agit de la librairie Servo.h.
 Sur l'interface, on retrouve le titre centré en haut, un switch qui contrôle le mode du parking (automatique ou manuel), 2 boutons en dessous 
 du switch avec l'ouverture et la fermeture barrière. A droite se trouve le bouton pour prendre un ticket (virtuel) et en dessous l'image de 
 la configuration de la barrière (ouverte, fermée et avec ou sans voiture présente). 
+
+
+---

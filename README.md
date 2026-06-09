@@ -2,25 +2,20 @@
 
 
 
-\## Description
+\# Description
 
 Ce projet consiste à concevoir et réaliser une carte électronique personnalisée destinée à être connectée à un STM32 afin de piloter une barrière de parking automatique avec un écran.
 
-
-
 Le système utilise deux capteurs infrarouges pour détecter le passage des véhicules et gérer automatiquement l’ouverture et la fermeture de la barrière via une interface de contrôle. La barrière est fixée à un servomoteur. 
 
-
-
 L’objectif est de simuler un système de contrôle d’accès intelligent, similaire à ceux utilisés dans les parkings.
-
 
 
 ---
 
 
 
-\## Objectifs du projet
+\# Objectifs du projet
 
 \- Concevoir une carte électronique (PCB) compatible STM32f746
 
@@ -37,7 +32,7 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 ---
 
 
-\## Matériel utilisé
+\# Matériel utilisé
 
 \- STM32f746
 
