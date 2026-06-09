@@ -31,7 +31,6 @@ bool ticket_ok = false;
 bool etat_barriere = false;
 bool voiture = false;
 bool mode_manuel = false; 
-bool est_ouvert = false; 
 
 using Clock = std::chrono::steady_clock;
 static Clock::time_point barriere_open_start;
@@ -44,6 +43,7 @@ static void event_handler(lv_event_t * e)
 
     if(code == LV_EVENT_CLICKED) {
       if (target == btn_ouvrir) {
+        etat_barriere = true;
         lv_obj_add_state(btn_ouvrir, LV_STATE_DISABLED);
         lv_obj_clear_state(btn_fermer, LV_STATE_DISABLED);
         barriere.write(60);
@@ -54,6 +54,7 @@ static void event_handler(lv_event_t * e)
         Serial.println("btn_ouvrir");
       }
       else if (target == btn_fermer) {
+        etat_barriere = false;
         lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
         lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
         barriere.write(140);
@@ -63,6 +64,7 @@ static void event_handler(lv_event_t * e)
       }
       else if (target == btn_ticket) {
         ticket_ok = true;
+        etat_barriere = true;
         lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
         Serial.println("btn_ticket");
       }
@@ -160,7 +162,7 @@ void init_affichage()
 
 void gestion_chrono() {
   // Appelée avec mutex déjà pris
-  if (barriere_ouverte_flag) {
+  if (etat_barriere) {
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
         Clock::now() - barriere_open_start).count();
 
@@ -169,11 +171,13 @@ void gestion_chrono() {
       if (mode_manuel == false) {
         ticket_ok = false;
         lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-        barriere_ouverte_flag = false;
+        //barriere_ouverte_flag = false;
+        etat_barriere = false;
       } else {
         lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
         lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
         lv_image_set_src(img_barriere, &barriere_fermee);
+        etat_barriere = false;
       }
       
       // lv_obj_add_state(btn_fermer, LV_STATE_DISABLED);
@@ -222,7 +226,7 @@ int gestion_capteurs() {
       Serial.println("Barriere ouverte - chrono demarre");
       return 1;
     }
-    else if (valS == LOW) {
+    else if (valS == LOW && ticket_ok == true) {
       etat_barriere = false;
       voiture = true;
       ticket_ok = false;
@@ -230,6 +234,22 @@ int gestion_capteurs() {
       barriere_ouverte_flag = false;
       lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
       Serial.println("Sortie detectee - barriere fermee");
+      return 1;
+    }
+    else if (valS == LOW && ticket_ok == false) {
+      etat_barriere = false;
+      voiture = true;
+      ticket_ok = false;
+      barriere.write(140);
+      barriere_ouverte_flag = false;
+      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+      Serial.println("Sortie detectee - barriere fermee");
+      return 1;
+    }
+    else if (valE == HIGH && valS == HIGH && ticket_ok == true) {
+      voiture = false;
+      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+      etat_barriere = true;
       return 1;
     }
     else {
