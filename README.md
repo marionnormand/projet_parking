@@ -4,15 +4,15 @@
 
 \## Description
 
-Ce projet consiste à concevoir et réaliser une carte électronique personnalisée destinée à être connectée à un Arduino Uno R3 afin de piloter une barrière de parking automatique.
+Ce projet consiste à concevoir et réaliser une carte électronique personnalisée destinée à être connectée à un STM32 afin de piloter une barrière de parking automatique avec un écran.
 
 
 
-Le système utilise deux capteurs infrarouges pour détecter le passage des véhicules et gérer automatiquement l’ouverture et la fermeture de la barrière via une interface de contrôle.
+Le système utilise deux capteurs infrarouges pour détecter le passage des véhicules et gérer automatiquement l’ouverture et la fermeture de la barrière via une interface de contrôle. La barrière est fixée à un servomoteur. 
 
 
 
-L’objectif est de simuler un système de contrôle d’accès intelligent, similaire à ceux utilisés dans les parkings ou zones privées.
+L’objectif est de simuler un système de contrôle d’accès intelligent, similaire à ceux utilisés dans les parkings.
 
 
 
@@ -22,11 +22,11 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 
 \## Objectifs du projet
 
-\- Concevoir une carte électronique (PCB) compatible Arduino Uno R3
+\- Concevoir une carte électronique (PCB) compatible STM32f746
 
-\- Intégrer des capteurs infrarouges de détection
+\- Lire les capeurs infrarouge
 
-\- Commander une barrière motorisée
+\- Commander le servomoteur
 
 \- Développer une interface de supervision
 
@@ -37,40 +37,9 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 ---
 
 
-
-\## Fonctionnement
-
-
-
-\### Détection
-
-\- Capteur IR 1 → Détecte l’arrivée d’un véhicule
-
-\- Capteur IR 2 → Détecte le passage complet du véhicule
-
-
-
-\### Logique
-
-1\. Véhicule détecté → Ouverture de la barrière
-
-2\. Véhicule passe le second capteur → Fermeture automatique
-
-3\. Sécurité : la barrière ne se ferme pas si un véhicule est encore présent
-
-4\. S'il n'y a plus de détection au niveau des capteurs, la barrière se ferme au bout de 1 minute 
-
-5\. L'ouverture et la fermeture de la barrière peuvent être controlés avec l'interface 
-
-
-
----
-
-
-
 \## Matériel utilisé
 
-\- Arduino Uno R3
+\- STM32f746
 
 \- Carte électronique personnalisée (PCB) avec régulateur LM7805 et connecteurs 
 
@@ -80,8 +49,7 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 
 \- Alimentation externe
 
-\- Câbles, résistances, transistors et composants passifs
-
+\- Câbles, condensateurs
 
 
 ---

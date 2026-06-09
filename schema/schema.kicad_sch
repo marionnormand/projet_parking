@@ -4,6 +4,11 @@
 	(generator_version "9.0")
 	(uuid "9a88feef-e625-4185-af2b-8539e6f38877")
 	(paper "A4")
+	(title_block
+		(title "Schéma pour projet parking")
+		(date "25/05/2026")
+		(comment 1 "Marion Normand ")
+	)
 	(lib_symbols
 		(symbol "Connector:Conn_01x02_Pin"
 			(pin_names
