@@ -70,6 +70,8 @@ static void event_handler(lv_event_t * e)
     }
     if (code == LV_EVENT_VALUE_CHANGED && target == swt_manuel) {
       if (lv_obj_has_state(swt_manuel, LV_STATE_CHECKED)) { 
+          if(!digitalRead(PIN_IRE)) voiture = true;
+          else voiture = false; 
           lv_label_set_text(label_manuel, "Mode manuel");
           mode_manuel = true;
           lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED); 
@@ -98,14 +100,14 @@ void init_affichage()
 {
   barriere.write(140);
 
-  lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0xFFFFFF), 0);
+  lv_obj_set_style_bg_color(lv_screen_active(), lv_color_hex(0xE3C1C1), 0); // couleur de fond 
   lv_obj_set_style_bg_opa(lv_screen_active(), LV_OPA_COVER, 0);
 
   label_parking = lv_label_create(lv_screen_active());
   lv_label_set_text(label_parking, "Parking de l'IUT");
   lv_obj_align(label_parking, LV_ALIGN_TOP_MID, 1, 6);
   lv_obj_set_style_text_font(label_parking, &lv_font_montserrat_20, 0);
-  lv_obj_set_style_text_color(label_parking, lv_color_hex(0x4061E4), 0);
+  lv_obj_set_style_text_color(label_parking, lv_color_hex(0x590C0C), 0);
 
   // image barriere fermee sans voiture au demarrage 
   img_barriere = lv_image_create(lv_screen_active());
@@ -119,10 +121,19 @@ void init_affichage()
   lv_obj_set_size(btn_ouvrir, 160, 50);
   lv_obj_align(btn_ouvrir, LV_ALIGN_BOTTOM_LEFT, 20, -80);
   lv_obj_remove_flag(btn_ouvrir, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(btn_ouvrir, lv_color_hex(0x4E3C62), 0); // violet
+  lv_obj_set_style_bg_color(btn_ouvrir, lv_color_hex(0x612C2C), 0); // 
+  lv_obj_set_style_radius(btn_ouvrir, LV_RADIUS_CIRCLE, 0);
+  // lv_obj_set_style_border_color(btn_ouvrir, lv_color_hex(0x2B5D99), 0); // Bordure 
+  // lv_obj_set_style_border_width(btn_ouvrir, 4, 0);                     // Épaisseur de 4 pixels
+  // lv_obj_set_style_border_opa(btn_ouvrir, LV_OPA_80, 0);                // Opacité du contour
+  lv_obj_set_style_shadow_width(btn_ouvrir, 15, 0);
+  lv_obj_set_style_shadow_color(btn_ouvrir, lv_color_hex(0x000000), 0);
+  lv_obj_set_style_shadow_opa(btn_ouvrir, LV_OPA_30, 0);
+  lv_obj_set_style_shadow_offset_y(btn_ouvrir, 6, 4); // Décale l'ombre vers le bas
   lv_obj_t * labelbutton1 = lv_label_create(btn_ouvrir);
   lv_label_set_text(labelbutton1, "Ouverture barriere");
   lv_obj_center(labelbutton1);
+  lv_obj_set_style_text_color(labelbutton1, lv_color_hex(0xFFFFFF), 0);
   lv_obj_add_state(btn_ouvrir, LV_STATE_DISABLED); // desactive au demarrage 
 
   // bouton fermeture barriere 
@@ -131,10 +142,19 @@ void init_affichage()
   lv_obj_set_size(btn_fermer, 160, 50);
   lv_obj_align(btn_fermer, LV_ALIGN_BOTTOM_LEFT, 20, -20);
   lv_obj_remove_flag(btn_fermer, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(btn_fermer, lv_color_hex(0x4E3C62), 0); // violet
+  lv_obj_set_style_bg_color(btn_fermer, lv_color_hex(0x612C2C), 0); // 
+  lv_obj_set_style_radius(btn_fermer, LV_RADIUS_CIRCLE, 0);
+  // lv_obj_set_style_border_color(btn_fermer, lv_color_hex(0x2B5D99), 0); // Bordure 
+  // lv_obj_set_style_border_width(btn_fermer, 4, 0);                     // Épaisseur de 4 pixels
+  // lv_obj_set_style_border_opa(btn_fermer, LV_OPA_80, 0);                // Opacité du contour
+  lv_obj_set_style_shadow_width(btn_fermer, 15, 0);
+  lv_obj_set_style_shadow_color(btn_fermer, lv_color_hex(0x000000), 0);
+  lv_obj_set_style_shadow_opa(btn_fermer, LV_OPA_30, 0);
+  lv_obj_set_style_shadow_offset_y(btn_fermer, 6, 4); // Décale l'ombre vers le bas
   lv_obj_t * labelbutton2 = lv_label_create(btn_fermer);
   lv_label_set_text(labelbutton2, "Fermeture barriere");
   lv_obj_center(labelbutton2);
+  lv_obj_set_style_text_color(labelbutton2, lv_color_hex(0xFFFFFF), 0);
   lv_obj_add_state(btn_fermer, LV_STATE_DISABLED); // desactive au demarrage 
 
   // bouton du ticket 
@@ -143,23 +163,42 @@ void init_affichage()
   lv_obj_set_size(btn_ticket, 160, 70);
   lv_obj_align(btn_ticket, LV_ALIGN_TOP_RIGHT, -20, 50);
   lv_obj_remove_flag(btn_ticket, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(btn_ticket, lv_color_hex(0xA64C1F), 0); // orange
+  lv_obj_set_style_bg_color(btn_ticket, lv_color_hex(0x7A1414), 0); // rouge
+  lv_obj_set_style_radius(btn_ticket, LV_RADIUS_CIRCLE, 0);
+  // lv_obj_set_style_border_color(btn_ticket, lv_color_hex(0x915F27), 0); // Bordure 
+  // lv_obj_set_style_border_width(btn_ticket, 4, 0);                     // Épaisseur de 4 pixels
+  // lv_obj_set_style_border_opa(btn_ticket, LV_OPA_80, 0);                // Opacité du contour
+  lv_obj_set_style_shadow_width(btn_ticket, 15, 0);
+  lv_obj_set_style_shadow_color(btn_ticket, lv_color_hex(0x000000), 0);
+  lv_obj_set_style_shadow_opa(btn_ticket, LV_OPA_30, 0);
+  lv_obj_set_style_shadow_offset_y(btn_ticket, 6, 4); // Décale l'ombre vers le bas
   lv_obj_t * labelbutton3 = lv_label_create(btn_ticket);
   lv_label_set_text(labelbutton3, "Prendre\nun ticket");
   lv_obj_set_style_text_align(labelbutton3, LV_TEXT_ALIGN_CENTER, 0);
   lv_obj_center(labelbutton3);
+  lv_obj_set_style_text_color(labelbutton3, lv_color_hex(0xFFFFFF), 0);
   lv_obj_add_state(btn_ticket, LV_STATE_DISABLED); // desactive au demarrage 
   
   // bouton pour le passage au mode manuel 
   swt_manuel = lv_switch_create(lv_screen_active());
   lv_obj_add_event_cb(swt_manuel, event_handler, LV_EVENT_ALL, NULL);
-  lv_obj_set_size(swt_manuel, 160, 50);
-  lv_obj_align(swt_manuel, LV_ALIGN_TOP_LEFT, 20, 80);
+  lv_obj_set_size(swt_manuel, 140, 50);
+  lv_obj_align(swt_manuel, LV_ALIGN_TOP_LEFT, 30, 80);
   lv_obj_remove_flag(swt_manuel, LV_OBJ_FLAG_PRESS_LOCK);
-  lv_obj_set_style_bg_color(swt_manuel, lv_color_hex(0x937BEF), 0); // orange
+  // switch mode auto
+  lv_obj_set_style_bg_color(swt_manuel, lv_color_hex(0x614141), LV_PART_MAIN | LV_STATE_DEFAULT); 
+  // switch mode manuel
+   lv_obj_set_style_bg_color(swt_manuel, lv_color_hex(0x994646), LV_PART_INDICATOR | LV_STATE_CHECKED); 
+  lv_obj_set_style_radius(swt_manuel, LV_RADIUS_CIRCLE, LV_PART_INDICATOR);
+  // curseur
+  lv_obj_set_style_bg_color(swt_manuel, lv_color_hex(0xDEC1C1), LV_PART_KNOB | LV_STATE_DEFAULT); // Curseur blanc
+  lv_obj_set_style_radius(swt_manuel, LV_RADIUS_CIRCLE, LV_PART_KNOB);
+  lv_obj_set_style_pad_all(swt_manuel, 0, LV_PART_MAIN | LV_STATE_CHECKED);
+
   label_manuel = lv_label_create(lv_screen_active());
   lv_label_set_text(label_manuel, "Mode auto");
-  lv_obj_align_to(label_manuel, swt_manuel, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+  lv_obj_align_to(label_manuel, swt_manuel, LV_ALIGN_OUT_TOP_MID, -10, 0);
+  lv_obj_set_style_text_color(label_manuel, lv_color_hex(0x590C0C), 0);
 }
 
 
@@ -189,11 +228,11 @@ void gestion_chrono() {
 
 // affichage de l'image (4 images différentes) en fonction de l'état de la barrière et de la présence d'une voiture
 void gestion_image() {
-  if (voiture && !mode_manuel) {
+  if (voiture) { //&& !mode_manuel) {
     if(etat_barriere) lv_image_set_src(img_barriere, &barriere_ouverte_voiture);
     else lv_image_set_src(img_barriere, &barriere_fermee_voiture);
   }
-  else if (!voiture && !mode_manuel) {
+  else if (!voiture) { //} && !mode_manuel) {
     if(etat_barriere) lv_image_set_src(img_barriere, &barriere_ouverte);
     else lv_image_set_src(img_barriere, &barriere_fermee);
   }
