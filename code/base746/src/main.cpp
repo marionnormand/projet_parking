@@ -11,6 +11,7 @@
 
 Servo barriere;
 
+// pin des capteurs 
 const int PIN_IRE = PA0;
 const int PIN_IRS = PB9;
 
@@ -26,6 +27,7 @@ static lv_obj_t * label_manuel = NULL;
 extern bool lvglLock(TickType_t xBlockTime);
 extern bool lvglUnlock();
 
+// flags du fonctionnement du système 
 bool ticket_ok = false;
 bool etat_barriere = false;
 bool voiture = false;
@@ -50,7 +52,6 @@ static void event_handler(lv_event_t * e)
         lv_image_set_src(img_barriere, &barriere_ouverte);
         lv_obj_add_state(swt_manuel, LV_STATE_DISABLED);
         barriere_open_start = Clock::now();
-        Serial.println("btn_ouvrir");
       }
       else if (target == btn_fermer) {
         etat_barriere = false;
@@ -58,30 +59,24 @@ static void event_handler(lv_event_t * e)
         lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED);
         barriere.write(140);
         lv_image_set_src(img_barriere, &barriere_fermee);
-        Serial.println("btn_fermer");
         lv_obj_clear_state(swt_manuel, LV_STATE_DISABLED);
       }
       else if (target == btn_ticket) {
         ticket_ok = true;
         etat_barriere = true;
         lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-        Serial.println("btn_ticket");
       }
     }
     if (code == LV_EVENT_VALUE_CHANGED && target == swt_manuel) {
-      if (lv_obj_has_state(swt_manuel, LV_STATE_CHECKED)) { 
-          if(!digitalRead(PIN_IRE)) voiture = true;
-          else voiture = false; 
+      if (lv_obj_has_state(swt_manuel, LV_STATE_CHECKED)) { // mode manuel 
           lv_label_set_text(label_manuel, "Mode manuel");
           mode_manuel = true;
           lv_obj_clear_state(btn_ouvrir, LV_STATE_DISABLED); 
-          Serial.println("Mode manuel activé"); // mode manuel
       } else { // mode automatique
           mode_manuel = false;
           lv_label_set_text(label_manuel, "Mode auto");
           lv_obj_add_state(btn_ouvrir, LV_STATE_DISABLED); 
           lv_obj_add_state(btn_fermer, LV_STATE_DISABLED); 
-          Serial.println("Mode manuel désactivé");
       }
     }
 }
@@ -208,6 +203,7 @@ void gestion_chrono() {
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
         Clock::now() - barriere_open_start).count();
 
+    // apres 5 secondes : fermeture barrière,affichage correct des boutons et changement des flags 
     if (elapsed >= TIMECHRONO) {
       barriere.write(140);
       if (mode_manuel == false) {
@@ -221,7 +217,6 @@ void gestion_chrono() {
         lv_image_set_src(img_barriere, &barriere_fermee);
         etat_barriere = false;
       }
-      Serial.println("Fermeture automatique apres chrono");
     }
   }
 }
@@ -243,58 +238,67 @@ int gestion_capteurs() {
   int valE = digitalRead(PIN_IRE);
   int valS = digitalRead(PIN_IRS);
 
-  Serial.printf("Entree: %d, Sortie: %d\n", valE, valS);
-  if (!mode_manuel) {
-    if (valE == LOW && valS == LOW) {
+  // voiture passant la barrière    
+  if (valE == LOW && valS == LOW) {
+    if (!mode_manuel) {
       etat_barriere = true;
       voiture = true;
-      return 1;
-    }
-    else if (valE == LOW && ticket_ok == false) {
+    } 
+    voiture = true;
+    return 1;
+  }
+  // voiture en entrée sans ticket 
+  else if (valE == LOW && ticket_ok == false) {
+    if (!mode_manuel) {
       etat_barriere = false;
-      voiture = true;
       lv_obj_clear_state(btn_ticket, LV_STATE_DISABLED);
-      return 1;
-    }
-    else if (valE == LOW && ticket_ok == true) {
+    } 
+    voiture = true;
+    return 1;
+  }
+  // voiture en entrée avec ticket 
+  else if (valE == LOW && ticket_ok == true) {
+    if (!mode_manuel) {
       etat_barriere = true;
-      voiture = true;
       barriere.write(60);
       barriere_open_start = Clock::now();
-      Serial.println("Barriere ouverte - chrono demarre");
-      return 1;
     }
-    else if (valS == LOW && ticket_ok == true) {
+    voiture = true;
+    return 1;
+  }
+  // voiture en sortie avec ticket 
+  else if (valS == LOW && ticket_ok == true) {
+    if (!mode_manuel) {
       etat_barriere = false;
-      voiture = true;
       ticket_ok = false;
       delay(500);
       barriere.write(140);
       lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-      Serial.println("Sortie detectee - barriere fermee");
-      return 1;
     }
-    else if (valS == LOW && ticket_ok == false) {
-      etat_barriere = false;
-      voiture = true;
-      ticket_ok = false;
-      barriere.write(140);
-      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-      Serial.println("Sortie detectee - barriere fermee");
-      return 1;
-    }
-    else if (valE == HIGH && valS == HIGH && ticket_ok == true) {
-      voiture = false;
-      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+    voiture = true;
+    return 1;
+  }
+  // voiture en sortie en mode manuel 
+  else if (valS == LOW && ticket_ok == false) {
+    voiture = true;
+    return 1;
+  }
+  // voiture sous la barrière avec ticket 
+  else if (valE == HIGH && valS == HIGH && ticket_ok == true) {
+    if (!mode_manuel) {
       etat_barriere = true;
-      return 1;
-    }
-    else {
       lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
-      etat_barriere = false;
-      voiture = false;
-      return 0;
     }
+    voiture = false;
+    return 1;
+  }
+  else {
+    if (!mode_manuel) {
+      etat_barriere = false;
+      lv_obj_add_state(btn_ticket, LV_STATE_DISABLED);
+    }
+    voiture = false;
+    return 0;
   }
   return 0;
 }
