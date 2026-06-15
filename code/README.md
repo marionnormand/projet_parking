@@ -1,4 +1,4 @@
-\# Description
+# Description
 
 Tout le programme a été codé en C++, avec une base de projet proposée par M. Guinand. 
 Il s'agit du code qui simule entièrement le comportement d'une entrée d'un parking. 
@@ -7,7 +7,7 @@ Il s'agit du code qui simule entièrement le comportement d'une entrée d'un par
 ---
 
 
-\# Librairies utilisées 
+# Librairies utilisées 
 
 Le programme utilise la librairie lvglDrivers.h pour utiliser l'écran qui est l'élement central du projet. 
 Pour contrôler le servomoteur, il s'agit de la librairie Servo.h. 
@@ -16,7 +16,7 @@ Pour contrôler le servomoteur, il s'agit de la librairie Servo.h.
 
 
 
-\# Logique
+# Logique
 
 - Mode automatique :
 
@@ -38,7 +38,7 @@ Pour contrôler le servomoteur, il s'agit de la librairie Servo.h.
 --- 
 
 
-\# Interface 
+# Interface 
 
 Sur l'interface, on retrouve le titre centré en haut, un switch qui contrôle le mode du parking (automatique ou manuel), 2 boutons en dessous 
 du switch avec l'ouverture et la fermeture barrière. A droite se trouve le bouton pour prendre un ticket (virtuel) et en dessous l'image de 

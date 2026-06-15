@@ -1,8 +1,8 @@
-\# Système de gestion de barrière de parking avec Arduino
+## Système de gestion de barrière de parking avec Arduino
 
 
 
-\# Description
+# Description
 
 Ce projet consiste à concevoir et réaliser une carte électronique personnalisée destinée à être connectée à un STM32 afin de piloter une barrière de parking automatique avec un écran.
 
@@ -15,7 +15,7 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 
 
 
-\# Objectifs du projet
+# Objectifs du projet
 
 \- Concevoir une carte électronique (PCB) compatible STM32f746
 
@@ -32,7 +32,7 @@ L’objectif est de simuler un système de contrôle d’accès intelligent, sim
 ---
 
 
-\# Matériel utilisé
+# Matériel utilisé
 
 \- STM32f746
 
